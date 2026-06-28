@@ -1,0 +1,15 @@
+---
+/**
+ * 全屏 AI 对话页（/chat 路由）。
+ * 移动端：100dvh 占满、字体 clamp、安全区适配；
+ * 桌面：左侧历史会话列表 + 右侧对话区（lg 起步双栏）。
+ */
+import Layout from '../layouts/Layout.astro';
+import ChatFullscreen from '../components/ChatFullscreen';
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8787';
+---
+
+<Layout title="AI 对话 · MyBlog" description="基于站内内容的检索式 AI 对话">
+  <ChatFullscreen apiBase={apiBase} client:load />
+</Layout>

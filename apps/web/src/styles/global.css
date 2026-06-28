@@ -1,0 +1,855 @@
+/* ==========================================================================
+   Font imports — must come before Tailwind
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif+SC:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Geist is loaded as a font file fallback */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local('Geist'), local('Geist Sans');
+}
+
+/* ==========================================================================
+   Theme tokens
+   ========================================================================== */
+:root,
+[data-theme='light'] {
+  --bg: #f0ece2;
+  --bg-soft: #ffffff;
+  --bg-elev: #ffffff;
+  --ink: #15110b;
+  --ink-soft: #4a4030;
+  --ink-mute: #8b7e63;
+  --border: rgba(20, 16, 12, 0.10);
+  --border-strong: rgba(20, 16, 12, 0.20);
+  --accent: #6d28d9;
+  --accent-2: #db2777;
+  --accent-3: #0e7490;
+  --grid-color: rgba(20, 16, 12, 0.05);
+  --noise-opacity: 0; /* 浅色模式也关闭颗粒 */
+  --noise-blend: multiply;
+  --grain-mix: 12%;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #0a0907;
+  --bg-soft: #1a1612;
+  --bg-elev: #221d18;
+  --ink: #f7f3ea;
+  --ink-soft: #ddd1bb;
+  --ink-mute: #8b7e63;
+  --border: rgba(247, 243, 234, 0.12);
+  --border-strong: rgba(247, 243, 234, 0.28);
+  --accent: #a78bfa;
+  --accent-2: #f0abfc;
+  --accent-3: #67e8f9;
+  --grid-color: rgba(247, 243, 234, 0.05);
+  --noise-opacity: 0; /* 彻底关闭颗粒 */
+  --noise-blend: soft-light;
+  --grain-mix: 18%;
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+   Base reset + typography
+   ========================================================================== */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    transition: background-color 300ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* CJK font fallback for Chinese characters */
+  :lang(zh), .cjk, [lang^='zh'] {
+    font-family: 'Noto Serif SC', 'Fraunces', serif;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+    border: 2px solid var(--bg);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* ==========================================================================
+   Background atmosphere —— 极简：纯 bg + 极淡的静态网格。
+   之前的 ::before 极光晕 + ::after 噪点叠在一起让 dark/light 都「蒙灰」，
+   这里把两层都关掉，只保留 bg 颜色和网格。需要氛围光时由组件自带。
+   ========================================================================== */
+.bg-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--bg);
+}
+
+/* ::before / ::after 保留类名以兼容现有 Layout.astro，但置为空 */
+.bg-atmosphere::before,
+.bg-atmosphere::after {
+  content: none;
+}
+
+/* 网格 —— 静态、不动画、遮罩柔化边缘 */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 30%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 30%, black 20%, transparent 80%);
+}
+
+/* ==========================================================================
+   Typography helpers
+   ========================================================================== */
+.font-display {
+  font-family: 'Fraunces', ui-serif, Georgia, serif;
+  font-feature-settings: 'ss01', 'kern', 'liga';
+  font-variation-settings: 'opsz' 144, 'SOFT' 50, 'WONK' 0;
+}
+
+.font-display-italic {
+  font-family: 'Fraunces', ui-serif, Georgia, serif;
+  font-style: italic;
+  font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: 'calt', 'liga';
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Eyebrow / tag */
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ==========================================================================
+   Buttons + interactions
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn-ghost {
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background: transparent;
+  color: var(--accent);
+  border-color: transparent;
+  transform: translateY(-2px);
+}
+
+/* Magnetic link */
+.link-magnetic {
+  position: relative;
+  display: inline-block;
+}
+
+.link-magnetic::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.link-magnetic:hover::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* ==========================================================================
+   Cards
+   ========================================================================== */
+.card {
+  position: relative;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 12px 32px -16px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme='dark'] .card {
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.08) inset,
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 16px 40px -16px rgba(0, 0, 0, 0.5);
+}
+
+.card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-4px);
+}
+
+.card-hover-glow:hover {
+  box-shadow:
+    0 0 0 1px var(--border-strong),
+    0 20px 40px -20px var(--accent),
+    0 0 80px -20px var(--accent);
+}
+
+.card-hover-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(167, 139, 250, 0.08), transparent 40%);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card-hover-glow:hover::before {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   View Transitions API
+   ========================================================================== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: fadeOutUp;
+}
+
+::view-transition-new(root) {
+  animation-name: fadeInUp;
+}
+
+@keyframes fadeOutUp {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Named transitions for shared elements */
+.vt-title {
+  view-transition-name: post-title;
+}
+
+.vt-cover {
+  view-transition-name: post-cover;
+}
+
+.vt-eyebrow {
+  view-transition-name: post-eyebrow;
+}
+
+/* ==========================================================================
+   Marquee (infinite scroll)
+   ========================================================================== */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 50s linear infinite;
+}
+
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ==========================================================================
+   Prose styles for markdown rendering
+   ========================================================================== */
+.prose-editorial {
+  font-family: 'Geist', sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: var(--ink-soft);
+  max-width: 68ch;
+  margin-inline: auto;
+}
+
+.prose-editorial h1,
+.prose-editorial h2,
+.prose-editorial h3,
+.prose-editorial h4 {
+  font-family: 'Fraunces', serif;
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  scroll-margin-top: 5rem;
+}
+
+.prose-editorial h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 3rem 0 1.5rem;
+  line-height: 1.1;
+}
+
+.prose-editorial h2 {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  margin: 3rem 0 1rem;
+  line-height: 1.2;
+}
+
+.prose-editorial h3 {
+  font-size: 1.375rem;
+  margin: 2rem 0 0.75rem;
+}
+
+.prose-editorial p {
+  margin: 1.25rem 0;
+}
+
+.prose-editorial a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: all 200ms;
+}
+
+.prose-editorial a:hover {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.prose-editorial strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.prose-editorial em {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  color: var(--ink);
+}
+
+.prose-editorial blockquote {
+  border-left: 2px solid var(--accent);
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  margin: 2rem 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 1.125rem;
+  color: var(--ink);
+}
+
+.prose-editorial ul,
+.prose-editorial ol {
+  padding-left: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.prose-editorial li {
+  margin: 0.5rem 0;
+  padding-left: 0.5rem;
+}
+
+.prose-editorial li::marker {
+  color: var(--accent);
+}
+
+.prose-editorial code:not(pre code) {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875em;
+  padding: 0.15rem 0.4rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+.prose-editorial pre,
+.prose-editorial pre.shiki-pre,
+.prose-editorial div.shiki-block pre {
+  margin: 0 !important;
+  padding: 1.25rem 1.5rem !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--bg-soft) !important;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.prose-editorial div.shiki-block {
+  margin: 2rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  /* 让 shiki 的颜色变量生效，背景由外层 div 提供 */
+}
+
+.prose-editorial pre code,
+.prose-editorial pre.shiki code,
+.prose-editorial div.shiki-block pre code {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.85rem !important;
+  line-height: 1.7 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--ink);
+}
+
+/* Shiki dual-theme：dark 模式用 dark 变量，light 模式用 light 变量 */
+:root[data-theme="dark"] .prose-editorial pre.shiki-pre,
+:root[data-theme="dark"] .prose-editorial div.shiki-block pre {
+  color: var(--shiki-dark);
+  background-color: var(--bg-soft) !important;
+}
+:root[data-theme="light"] .prose-editorial pre.shiki-pre,
+:root[data-theme="light"] .prose-editorial div.shiki-block pre {
+  color: var(--shiki-light);
+  background-color: var(--bg-soft) !important;
+}
+
+/* 关键：shiki 在双主题模式下，token <span> 上只有 CSS 变量（--shiki-light/--shiki-dark），
+   没有直接的 color 属性。需要 CSS 把它们映射到对应的主题颜色。
+   没有这一规则，span 会继承 pre 的 color（var(--ink)），导致语法高亮色全部丢失。 */
+:root[data-theme="dark"] .prose-editorial div.shiki-block pre code span,
+:root[data-theme="dark"] .prose-editorial pre.shiki-pre span,
+:root[data-theme="dark"] .prose-editorial div.shiki-block pre.shiki span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style, inherit) !important;
+  font-weight: var(--shiki-dark-font-weight, inherit) !important;
+  text-decoration: var(--shiki-dark-text-decoration, inherit) !important;
+}
+:root[data-theme="light"] .prose-editorial div.shiki-block pre code span,
+:root[data-theme="light"] .prose-editorial pre.shiki-pre span,
+:root[data-theme="light"] .prose-editorial div.shiki-block pre.shiki span {
+  color: var(--shiki-light) !important;
+  font-style: var(--shiki-light-font-style, inherit) !important;
+  font-weight: var(--shiki-light-font-weight, inherit) !important;
+  text-decoration: var(--shiki-light-text-decoration, inherit) !important;
+}
+
+/* 不带 lang（纯文本 fallback）的代码块：没有 --shiki-light/dark 变量，要用默认 ink 色 */
+.prose-editorial div.shiki-block pre code span:not([style*="--shiki"]) {
+  color: var(--ink) !important;
+}
+
+.prose-editorial img {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.prose-editorial hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 3rem auto;
+  max-width: 4rem;
+}
+
+.prose-editorial table {
+  width: 100%;
+  margin: 2rem 0;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.prose-editorial th,
+.prose-editorial td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.prose-editorial th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* Custom containers (tip/warning/info/danger) */
+.prose-editorial .container-tip,
+.prose-editorial .container-info,
+.prose-editorial .container-warning,
+.prose-editorial .container-danger {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid;
+  border-radius: 0 8px 8px 0;
+  background: var(--bg-soft);
+  font-size: 0.95rem;
+}
+
+.prose-editorial .container-tip {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.06);
+}
+.prose-editorial .container-info {
+  border-color: var(--accent-3);
+  background: rgba(6, 182, 212, 0.06);
+}
+.prose-editorial .container-warning {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.06);
+}
+.prose-editorial .container-danger {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.prose-editorial .container-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Noise + texture overlays
+   ========================================================================== */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: var(--noise-opacity);
+  mix-blend-mode: var(--noise-blend, soft-light);
+}
+
+/* ==========================================================================
+   Page loader
+   ========================================================================== */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  /* 整段动画：0.4s 入场 + 0.1s 停留 + 0.35s 退场 = 850ms 后 visibility:hidden */
+  animation: loaderLife 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@keyframes loaderLife {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  65%  { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+.loader-mark {
+  font-family: 'Fraunces', 'Noto Serif SC', serif;
+  font-size: 4rem;
+  font-weight: 300;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: visible;
+  opacity: 0.92;
+  animation: loaderIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes loaderIn {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.96); filter: blur(8px); }
+  100% { opacity: 0.92; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes twCursorBlink {
+  /* 真终端硬切：steps(2, start) → 0%/50% 实色、50%/100% 透明，瞬时切换 */
+  0%, 49.99%   { border-right-color: currentColor; }
+  50%, 100%    { border-right-color: transparent; }
+}
+
+/* 兼容旧 keyframe（保留以防外部引用） */
+@keyframes twCursorBlinkSoft {
+  0%, 100% { border-right-color: var(--ink-soft); }
+  50%      { border-right-color: transparent; }
+}
+
+/* ==========================================================================
+   Cursor
+   ========================================================================== */
+@media (pointer: fine) {
+  .cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 60ms ease-out, width 200ms, height 200ms;
+    mix-blend-mode: difference;
+  }
+
+  .cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9997;
+    transform: translate(-50%, -50%);
+    transition: width 250ms cubic-bezier(0.16, 1, 0.3, 1),
+      height 250ms cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 250ms,
+      border-color 250ms;
+    mix-blend-mode: difference;
+  }
+
+  .cursor-ring.hover {
+    width: 60px;
+    height: 60px;
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  body {
+    cursor: none;
+  }
+
+  a, button {
+    cursor: none;
+  }
+}
+
+/* ==========================================================================
+   Shiki code blocks
+   ========================================================================== */
+.shiki-block {
+  position: relative;
+}
+
+.shiki-block .shiki-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--ink-mute);
+  letter-spacing: 0.05em;
+}
+
+.shiki-block .shiki-lang {
+  text-transform: uppercase;
+}
+
+.shiki-block .shiki-copy {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--ink-mute);
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  transition: color 200ms;
+}
+
+.shiki-block .shiki-copy:hover {
+  color: var(--accent);
+}
+
+[data-theme='dark'] .shiki,
+[data-theme='dark'] .shiki span {
+  color: var(--shiki-dark, inherit) !important;
+  background-color: transparent !important;
+  font-style: var(--shiki-dark-font-style, inherit) !important;
+  font-weight: var(--shiki-dark-font-weight, inherit) !important;
+  text-decoration: var(--shiki-dark-text-decoration, inherit) !important;
+}
+
+/* ==========================================================================
+   Status badges (breathing)
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: breath 3s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Scroll progress
+   ========================================================================== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+  z-index: 100;
+  transition: width 100ms linear;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+/* ==========================================================================
+   Mobile tweaks
+   ========================================================================== */
+@media (max-width: 768px) {
+  .prose-editorial {
+    font-size: 1rem;
+  }
+  .prose-editorial pre code {
+    font-size: 0.78rem !important;
+  }
+}

@@ -1,0 +1,2 @@
+# 占位文件：保证 data/ 目录在 clone 下来的仓库里存在
+# data/myblog.db / data/uploads/ 由应用运行时创建，已在 .gitignore 排除

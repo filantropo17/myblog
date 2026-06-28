@@ -1,0 +1,99 @@
+---
+import SubscribeForm from './SubscribeForm';
+const year = new Date().getFullYear();
+---
+
+<footer class="relative z-10 mt-32 border-t border-[var(--border)]">
+  <div class="mx-auto max-w-[1320px] px-6 py-16 md:px-10">
+    <!-- 行动召唤区 -->
+    <div class="mb-16 flex flex-col gap-6 md:mb-24">
+      <span class="eyebrow">打个招呼</span>
+      <h2 class="font-display text-display-lg text-balance font-light tracking-tight">
+        <span class="text-gradient">一起打造</span>
+        <br />
+        值得回味的作品。
+      </h2>
+      <p class="max-w-md text-sm leading-relaxed text-[var(--ink-mute)]">
+        想第一时间收到新文章？留下邮箱就好。无骚扰，可随时一键退订。
+      </p>
+      <div class="mt-2">
+        <SubscribeForm client:load />
+      </div>
+      <div class="mt-2 flex flex-wrap items-center gap-3">
+        <a href="mailto:hi@example.com" class="btn" data-cursor="hover">
+          <span>或发邮件 hi@example.com</span>
+        </a>
+        <a href="/rss.xml" class="btn btn-ghost" data-cursor="hover">
+          <span>RSS</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 跑马灯技术栈 -->
+    <div class="relative mb-16 overflow-hidden border-y border-[var(--border)] py-8">
+      <div class="marquee gap-12 whitespace-nowrap">
+        {[...Array(2)].flatMap(() => [
+          'Python 3.12',
+          '· Claude Code',
+          '· MCP',
+          '· SKILL',
+          '· Agent SDK',
+          '· RAG',
+          '· Workflow',
+          '· Prompt Eng.',
+          '· Cursor',
+          '· LangChain',
+          '· Vector DB',
+          '· FastAPI',
+        ]).map((t) => (
+          <span class="font-display text-3xl font-light tracking-tight opacity-60 md:text-5xl">
+            {t}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <!-- 底部网格 -->
+    <div class="grid gap-12 md:grid-cols-4">
+      <div class="md:col-span-2">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--accent)] via-[var(--accent-2)] to-[var(--accent-3)] p-[1px]">
+            <div class="flex h-full w-full items-center justify-center rounded-full bg-[var(--bg)]">
+              <span class="font-display text-sm font-medium text-gradient">m</span>
+            </div>
+          </div>
+          <span class="font-display text-xl font-medium tracking-tight">myblog</span>
+        </div>
+        <p class="max-w-md text-sm leading-relaxed text-[var(--ink-mute)]">
+          一个关于 vibecoding 实践的 AI 协作博客。
+          在这里记录 prompt、对话与能跑起来的代码。
+        </p>
+      </div>
+
+      <div>
+        <div class="eyebrow mb-4">导航</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="/" class="link-magnetic hover:text-[var(--accent)]">首页</a></li>
+          <li><a href="/posts" class="link-magnetic hover:text-[var(--accent)]">文章</a></li>
+          <li><a href="/projects" class="link-magnetic hover:text-[var(--accent)]">项目</a></li>
+          <li><a href="/about" class="link-magnetic hover:text-[var(--accent)]">关于</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="eyebrow mb-4">其它</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="https://github.com" target="_blank" class="link-magnetic hover:text-[var(--accent)]">GitHub ↗</a></li>
+          <li><a href="https://twitter.com" target="_blank" class="link-magnetic hover:text-[var(--accent)]">Twitter ↗</a></li>
+          <li><a href="mailto:hi@example.com" class="link-magnetic hover:text-[var(--accent)]">邮件</a></li>
+          <li><a href="/rss.xml" class="link-magnetic hover:text-[var(--accent)]">RSS</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-16 flex flex-col items-start justify-between gap-3 border-t border-[var(--border)] pt-8 font-mono text-xs text-[var(--ink-mute)] md:flex-row md:items-center">
+      <span>© {year} MyBlog · 用心构筑，闪电发布</span>
+      <span class="tracking-wider">v2.0 · 最近部署 2026-06-26</span>
+    </div>
+  </div>
+</footer>

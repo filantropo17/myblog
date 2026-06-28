@@ -1,0 +1,201 @@
+---
+const pathname = Astro.url.pathname;
+const links = [
+  { href: '/', label: '首页', sub: '00' },
+  { href: '/posts', label: '文章', sub: '01' },
+  { href: '/vibe', label: 'Vibe', sub: '02' },
+  { href: '/projects', label: '项目', sub: '03' },
+  { href: '/about', label: '关于', sub: '04' },
+];
+---
+
+<header
+  class="sticky top-0 z-40 backdrop-blur-md transition-all duration-300"
+  style="background: color-mix(in srgb, var(--bg) 65%, transparent); border-bottom: 1px solid var(--border);"
+>
+  <div class="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-5 py-3 md:gap-8 md:px-10 md:py-4">
+    <a
+      href="/"
+      class="group flex items-center gap-3"
+      data-cursor="hover"
+    >
+      <div class="relative h-9 w-9 overflow-hidden rounded-full border border-[var(--border-strong)] bg-gradient-to-br from-[var(--accent)] via-[var(--accent-2)] to-[var(--accent-3)] p-[1px]">
+        <div class="flex h-full w-full items-center justify-center rounded-full bg-[var(--bg)]">
+          <span class="font-display text-sm font-medium tracking-tight text-gradient">m</span>
+        </div>
+      </div>
+      <div class="hidden flex-col leading-none sm:flex">
+        <span class="font-display text-base font-medium tracking-tight">myblog</span>
+        <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--ink-mute)]">v2 · 2026</span>
+      </div>
+    </a>
+
+    {/* Desktop nav */}
+    <nav class="hidden items-center gap-1 md:flex">
+      {
+        links.map((l) => {
+          const active = pathname === l.href || (l.href !== '/' && pathname.startsWith(l.href));
+          return (
+            <a
+              href={l.href}
+              class:list={[
+                'group relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-all duration-300',
+                active
+                  ? 'text-[var(--ink)]'
+                  : 'text-[var(--ink-mute)] hover:text-[var(--ink)]',
+              ]}
+              data-cursor="hover"
+            >
+              <span class="font-mono text-[10px] tracking-wider opacity-50 transition-opacity group-hover:opacity-100">
+                {l.sub}
+              </span>
+              <span class="font-medium">{l.label}</span>
+              {active && (
+                <span class="absolute inset-0 -z-10 rounded-full border border-[var(--border-strong)] bg-[var(--bg-soft)]" />
+              )}
+              <span class="absolute bottom-1.5 left-1/2 h-[1px] w-0 -translate-x-1/2 bg-[var(--accent)] transition-all duration-500 group-hover:w-6" />
+            </a>
+          );
+        })
+      }
+    </nav>
+
+    <div class="flex items-center gap-2 md:gap-3">
+      <a
+        href="https://github.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hidden h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-[var(--ink-mute)] transition-all hover:border-[var(--accent)] hover:text-[var(--accent)] md:flex"
+        aria-label="GitHub"
+        data-cursor="hover"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+        </svg>
+      </a>
+      <a href="/rss.xml" class="hidden h-9 items-center gap-2 rounded-full border border-[var(--border)] px-4 text-[var(--ink-mute)] transition-all hover:border-[var(--accent)] hover:text-[var(--accent)] md:inline-flex" data-cursor="hover">
+        <span class="font-mono text-[10px] uppercase tracking-[0.15em]">RSS</span>
+      </a>
+      <a
+        href="/about"
+        class="btn btn-primary !py-1.5 !text-[11px] md:!py-2 md:!text-xs"
+        data-cursor="hover"
+      >
+        <span>联系我</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+      {/* Mobile 汉堡按钮 */}
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        aria-label="打开菜单"
+        class="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-[var(--ink)] transition-all hover:border-[var(--accent)] md:hidden"
+        data-cursor="hover"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <line x1="4" y1="7" x2="20" y2="7" class="line-top" />
+          <line x1="4" y1="12" x2="20" y2="12" class="line-mid" />
+          <line x1="4" y1="17" x2="20" y2="17" class="line-bot" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+{/* Mobile 全屏菜单面板（默认隐藏，md 以上不渲染） */}
+<div
+  id="mobile-menu"
+  class="fixed inset-0 z-30 hidden flex-col gap-6 bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] px-6 pb-8 pt-24 backdrop-blur-xl md:hidden"
+  style="background: color-mix(in srgb, var(--bg) 92%, transparent);"
+>
+  <div class="flex flex-col gap-2">
+    {links.map((l) => {
+      const active = pathname === l.href || (l.href !== '/' && pathname.startsWith(l.href));
+      return (
+        <a
+          href={l.href}
+          class:list={[
+            'group flex items-center justify-between rounded-2xl border px-5 py-4 transition-all',
+            active
+              ? 'border-[var(--accent)] bg-[var(--bg-soft)]'
+              : 'border-[var(--border)] bg-[var(--bg-soft)]/60 hover:border-[var(--accent)]',
+          ]}
+          data-mobile-link
+        >
+          <span class="flex items-baseline gap-3">
+            <span class="font-mono text-[10px] tracking-wider text-[var(--ink-mute)]">{l.sub}</span>
+            <span class="font-display text-2xl font-light tracking-tight">{l.label}</span>
+          </span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="opacity-50">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </a>
+      );
+    })}
+  </div>
+  <div class="mt-auto flex flex-col gap-2">
+    <a
+      href="/about"
+      class="btn btn-primary w-full justify-center !py-3"
+      data-mobile-link
+    >
+      <span>联系我</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    </a>
+    <div class="flex items-center justify-center gap-3 text-[var(--ink-mute)]">
+      <a
+        href="https://github.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] transition-all hover:border-[var(--accent)] hover:text-[var(--accent)]"
+        aria-label="GitHub"
+        data-mobile-link
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+        </svg>
+      </a>
+      <a
+        href="/rss.xml"
+        class="flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-4 transition-all hover:border-[var(--accent)] hover:text-[var(--accent)]"
+        data-mobile-link
+      >
+        <span class="font-mono text-[10px] uppercase tracking-[0.15em]">RSS</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    if (!btn || !menu) return;
+    const open = () => {
+      menu.classList.remove('hidden');
+      menu.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      btn.setAttribute('aria-label', '关闭菜单');
+    };
+    const close = () => {
+      menu.classList.add('hidden');
+      menu.classList.remove('flex');
+      document.body.style.overflow = '';
+      btn.setAttribute('aria-label', '打开菜单');
+    };
+    btn.addEventListener('click', () => {
+      if (menu.classList.contains('hidden')) open();
+      else close();
+    });
+    menu.querySelectorAll('[data-mobile-link]').forEach((el) => {
+      el.addEventListener('click', close);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.classList.contains('hidden')) close();
+    });
+  })();
+</script>

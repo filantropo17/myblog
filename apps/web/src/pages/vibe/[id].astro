@@ -1,0 +1,137 @@
+---
+/**
+ * Vibe 详情页。
+ *
+ * - 超大字号（clamp(1.75rem, 5vw, 3rem)）
+ * - 无标题，仅正文 + 时间 + mood badge
+ */
+import Layout from '../../layouts/Layout.astro';
+import CommentSection from '../../components/CommentSection';
+import LikeButton from '../../components/LikeButton';
+import ViewBeacon from '../../components/ViewBeacon';
+
+export async function getStaticPaths() {
+  // 列所有 vibe 笔记的 id，用于构建期预生成静态页。
+  // 注意：必须 inline 算 apiBase，**不能依赖文件里后面声明的 const apiBase** —
+  // Astro 5 在 ESM 顶层单独执行 getStaticPaths，模块顶层 const 还没绑定就被调用。
+  const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8787';
+  try {
+    const res = await fetch(`${apiBase}/api/v1/vibe?limit=500`);
+    if (!res.ok) return [];
+    const json = (await res.json()) as { ok: boolean; data: any[] };
+    if (!json.ok) return [];
+    return json.data.map((n: any) => ({ params: { id: String(n.id) } }));
+  } catch {
+    return [];
+  }
+}
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8787';
+
+const { id } = Astro.params;
+const res = await fetch(`${apiBase}/api/v1/vibe/${id}`).catch(() => null);
+
+if (!res?.ok) {
+  return Astro.redirect('/vibe');
+}
+const json = await res.json();
+const note: any = json.data;
+
+const moodLabel: Record<string, string> = {
+  happy: 'happy',
+  think: 'thinking',
+  angry: 'ranting',
+  tired: 'tired',
+  inspired: 'inspired',
+  chill: 'chill',
+};
+
+// API 字段是 createdAt（camelCase），不是 created_at。
+// 兼容回退到 updatedAt，再不行就用当前时间。
+const createdDate = new Date(note.createdAt ?? note.updatedAt ?? Date.now());
+const yy = createdDate.getFullYear();
+const mm = String(createdDate.getMonth() + 1).padStart(2, '0');
+const dd = String(createdDate.getDate()).padStart(2, '0');
+const hh = String(createdDate.getHours()).padStart(2, '0');
+const mi = String(createdDate.getMinutes()).padStart(2, '0');
+const dateStr = `${yy}.${mm}.${dd}`;
+const timeStr = `${hh}:${mi}`;
+---
+
+<Layout title={`Vibe · ${dateStr}`} description={note.content.slice(0, 100)}>
+  <ViewBeacon
+    targetType="vibe"
+    targetId={note.id}
+    path={`/vibe/${note.id}`}
+    apiBase={apiBase}
+    client:load
+  />
+  <article class="mx-auto flex min-h-[80vh] max-w-[760px] flex-col justify-center px-5 py-16 md:px-10 md:py-24">
+    <div class="mb-8 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--ink-mute)]">
+      <a
+        href="/vibe"
+        class="inline-flex items-center gap-2 transition-colors hover:text-[var(--ink)]"
+        data-cursor="hover"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M19 12H5M11 18l-6-6 6-6" />
+        </svg>
+        <span>back to vibe</span>
+      </a>
+      {
+        note.mood && (
+          <span class="rounded-full border border-[var(--border-strong)] px-3 py-1">
+            {moodLabel[note.mood] ?? note.mood}
+          </span>
+        )
+      }
+    </div>
+
+    <h1
+      class="font-display font-light leading-[1.2] tracking-[-0.02em] text-[var(--ink)]"
+      style="font-size: clamp(1.5rem, 3.5vw, 2.25rem);"
+    >
+      {note.title ?? note.content.slice(0, 30)}
+    </h1>
+
+    {note.content && note.title && note.content !== note.title && (
+      <p
+        class="mt-6 font-display font-light leading-[1.7] tracking-[-0.005em] text-[var(--ink-soft)] whitespace-pre-wrap"
+        style="font-size: clamp(1.0625rem, 1.5vw, 1.25rem);"
+      >
+        {note.content}
+      </p>
+    )}
+
+    <footer class="mt-12 flex items-center gap-4 border-t border-[var(--border)] pt-6 font-mono text-xs text-[var(--ink-mute)]">
+      <time datetime={String(note.createdAt ?? note.updatedAt ?? '')}>{dateStr} · {timeStr}</time>
+      {
+        note.pinned ? (
+          <span class="inline-flex items-center gap-1 text-[var(--accent)]">
+            <span>✦</span>
+            <span>pinned</span>
+          </span>
+        ) : null
+      }
+      <span class="ml-auto">
+        <LikeButton
+          targetType="vibe"
+          targetId={note.id}
+          apiBase={apiBase}
+          initialCount={note.likeCount ?? note.like_count ?? 0}
+          client:load
+        />
+      </span>
+    </footer>
+  </article>
+
+  <!-- 评论 -->
+  <section class="mx-auto max-w-[760px] px-5 pb-20 md:px-10">
+    <CommentSection
+      targetType="vibe"
+      targetId={note.id}
+      apiBase={apiBase}
+      client:load
+    />
+  </section>
+</Layout>

@@ -1,0 +1,233 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+ * 设计令牌 —— 主题感知（深 / 浅）。
+ * 与 web/src/styles/global.css 的语义保持一致。
+ * ============================================================================= */
+
+/* ==========================================================================
+   主题令牌 —— 严格区分「页面 / 卡片 / 悬浮在 bg 上的层」。
+   之前 bg-white/N 在 light 下被映射成白底白底导致导航栏 / 按钮失效。
+   现在拆成 surface（卡片专用）与 on-bg（按钮 / 选中态 / 微背景）。
+   ========================================================================== */
+:root {
+  --admin-bg: #050507;
+  --admin-bg-soft: rgba(255, 255, 255, 0.02);
+  --admin-bg-elev: rgba(255, 255, 255, 0.04);
+  /* on-bg：用于按钮、选中态、悬浮层——dark 下白、light 下暗 */
+  --admin-on-bg-faint: rgba(255, 255, 255, 0.02);
+  --admin-on-bg-soft:  rgba(255, 255, 255, 0.035);
+  --admin-on-bg:       rgba(255, 255, 255, 0.06);
+  --admin-on-bg-strong: rgba(255, 255, 255, 0.10);
+  --admin-border: rgba(255, 255, 255, 0.08);
+  --admin-border-strong: rgba(255, 255, 255, 0.14);
+  --admin-ink: #e8e8ec;
+  --admin-ink-soft: #b8b8c2;
+  --admin-ink-mute: #6c6c78;
+  --admin-accent: #7c3aed;
+  --admin-accent-hover: #6d28d9;
+  --admin-grid: rgba(255, 255, 255, 0.025);
+  --admin-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  --admin-bg: #f6f3ec;
+  --admin-bg-soft: #ffffff;
+  --admin-bg-elev: #ffffff;
+  --admin-on-bg-faint: rgba(20, 16, 14, 0.025);
+  --admin-on-bg-soft:  rgba(20, 16, 14, 0.045);
+  --admin-on-bg:       rgba(20, 16, 14, 0.07);
+  --admin-on-bg-strong: rgba(20, 16, 14, 0.12);
+  --admin-border: rgba(20, 16, 14, 0.10);
+  --admin-border-strong: rgba(20, 16, 14, 0.18);
+  --admin-ink: #1a1612;
+  --admin-ink-soft: #4a4030;
+  --admin-ink-mute: #9c8e72;
+  --admin-accent: #6d28d9;
+  --admin-accent-hover: #5b21b6;
+  --admin-grid: rgba(20, 16, 14, 0.04);
+  --admin-shadow: 0 20px 60px -20px rgba(20, 16, 14, 0.18);
+  color-scheme: light;
+}
+
+html, body {
+  background: var(--admin-bg);
+  color: var(--admin-ink);
+  font-family: 'Geist', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--admin-accent);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--admin-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--admin-accent);
+}
+
+.font-display {
+  font-family: 'Fraunces', serif;
+  font-feature-settings: 'ss01', 'kern';
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ============ 语义化工具类 ============
+   bg-white/N 是「悬浮在 bg 上的微层」语义（按钮 / 选中态 / 表头），
+   现在通过 on-bg 令牌在 light/dark 双向工作。
+   真正的卡片请用 .card / .card-elev 语义类。 */
+
+.bg-ink-950   { background: var(--admin-bg); }
+.bg-ink-900   { background: var(--admin-bg-soft); }
+
+.bg-white\/\[0\.01\] { background: var(--admin-on-bg-faint); }
+.bg-white\/\[0\.02\] { background: var(--admin-on-bg-faint); }
+.bg-white\/\[0\.03\] { background: var(--admin-on-bg-soft); }
+.bg-white\/\[0\.04\] { background: var(--admin-on-bg); }
+.bg-white\/5         { background: var(--admin-on-bg); }
+.bg-white\/10        { background: var(--admin-on-bg-strong); }
+
+.text-ink-300 { color: var(--admin-ink-soft); }
+.text-ink-400 { color: var(--admin-ink-soft); }
+.text-ink-500 { color: var(--admin-ink-mute); }
+.text-ink-200 { color: var(--admin-ink); }
+.text-ink     { color: var(--admin-ink); }
+
+.border-white\/5,
+.border-white\/10 { border-color: var(--admin-border) !important; }
+.border-white\/30 { border-color: var(--admin-border-strong) !important; }
+
+.hover\:bg-white\/\[0\.03\]:hover { background: var(--admin-on-bg-soft) !important; }
+.hover\:bg-white\/\[0\.06\]:hover { background: var(--admin-on-bg-strong) !important; }
+
+.hover\:text-ink-200:hover,
+.hover\:text-white:hover { color: var(--admin-ink) !important; }
+
+.hover\:text-red-400:hover { color: #f87171; }
+.hover\:border-red-500\/40:hover { border-color: rgba(239, 68, 68, 0.4) !important; }
+
+/* ============ 组件样式 ============ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 200ms;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--admin-accent);
+  color: white;
+}
+.btn-primary:hover {
+  background: var(--admin-accent-hover);
+}
+
+.btn-secondary {
+  background: var(--admin-bg-soft);
+  border-color: var(--admin-border);
+  color: var(--admin-ink);
+}
+.btn-secondary:hover {
+  background: var(--admin-bg-elev);
+  border-color: var(--admin-border-strong);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.card {
+  background: var(--admin-bg-soft);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+}
+
+.card-elev {
+  background: var(--admin-bg-elev);
+  border: 1px solid var(--admin-border);
+  box-shadow: var(--admin-shadow);
+}
+
+.input {
+  width: 100%;
+  background: var(--admin-bg-soft);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  color: var(--admin-ink);
+  font-size: 0.875rem;
+  transition: all 200ms;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--admin-border);
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--admin-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--admin-grid) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-aurora {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 58, 237, 0.18), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(217, 70, 239, 0.1), transparent);
+}
+
+html[data-theme='light'] .bg-aurora {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 58, 237, 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(217, 70, 239, 0.05), transparent);
+}

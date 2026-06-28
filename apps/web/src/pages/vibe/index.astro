@@ -1,0 +1,132 @@
+---
+/**
+ * Vibe 笔记列表页。
+ *
+ * - 时间线风格，按月份分组倒序
+ * - 左对齐 + 时间戳右对齐，hover 背景色微变
+ * - mood badge 显示
+ */
+import Layout from '../../layouts/Layout.astro';
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8787';
+const res = await fetch(`${apiBase}/api/v1/vibe?limit=100`).catch(() => null);
+const json = res?.ok ? await res.json() : { data: [] };
+const notes: any[] = json.data ?? [];
+
+// 按月份分组
+const groups: Record<string, any[]> = {};
+for (const n of notes) {
+  const d = new Date(n.createdAt ?? n.updatedAt ?? Date.now());
+  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  if (!groups[key]) groups[key] = [];
+  groups[key].push(n);
+}
+const sortedMonths = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+
+const moodEmoji: Record<string, string> = {
+  happy: '✦',
+  think: '◐',
+  angry: '✕',
+  tired: '◌',
+  inspired: '✺',
+  chill: '◡',
+};
+const moodLabel: Record<string, string> = {
+  happy: '开心',
+  think: '思考',
+  angry: '吐槽',
+  tired: '疲惫',
+  inspired: '灵感',
+  chill: '惬意',
+};
+
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function monthLabel(key: string) {
+  const [y, m] = key.split('-');
+  return `${y} · ${m} 月`;
+}
+---
+
+<Layout title="Vibe · MyBlog" description="短、随性、灵感流。">
+  <section class="mx-auto max-w-[860px] px-5 py-12 md:px-10 md:py-20">
+    <header class="mb-12 md:mb-16">
+      <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--ink-mute)]"> · Vibe Notes
+      </p>
+      <h1 class="mt-3 font-display text-4xl font-light leading-tight tracking-tight md:text-6xl">
+        灵感 · 片段 · <span class="text-gradient">当下</span>
+      </h1>
+      <p class="mt-5 max-w-[42ch] text-sm text-[var(--ink-mute)] md:text-base">
+        短的、随性的、像 tweet / moment 一样的笔记。
+        <br />
+        不追求完整，只捕捉当下的一个念头。
+      </p>
+    </header>
+
+    {
+      sortedMonths.length === 0 ? (
+        <p class="text-[var(--ink-mute)]">还没有 Vibe 笔记。</p>
+      ) : (
+        <div class="space-y-12 md:space-y-16">
+          {sortedMonths.map((key) => (
+            <section>
+              <div class="mb-5 flex items-baseline gap-4 border-b border-[var(--border)] pb-3">
+                <h2 class="font-mono text-xs uppercase tracking-[0.2em] text-[var(--ink-mute)]">
+                  {monthLabel(key)}
+                </h2>
+                <span class="font-mono text-[10px] text-[var(--ink-mute)] opacity-60">
+                  {groups[key].length} 则
+                </span>
+              </div>
+
+              <ul class="space-y-1">
+                {groups[key].map((n: any) => {
+                  const displayTitle = n.title ?? n.content.slice(0, 30);
+                  const showBody = n.content && n.content !== displayTitle;
+                  return (
+                    <li>
+                      <a
+                        href={`/vibe/${n.id}`}
+                        class="group flex items-start gap-4 rounded-xl px-4 py-4 transition-all hover:bg-[var(--bg-soft)] md:gap-8 md:px-5"
+                        data-cursor="hover"
+                      >
+                        <span class="mt-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--border)] font-mono text-xs text-[var(--ink-mute)] group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">
+                          {n.pinned ? '✦' : moodEmoji[n.mood ?? 'chill'] ?? '◡'}
+                        </span>
+                        <div class="flex-1 min-w-0">
+                          <p class="font-display text-lg font-light leading-snug tracking-[-0.01em] text-[var(--ink)] md:text-xl">
+                            {displayTitle}
+                          </p>
+                          {showBody && (
+                            <p class="mt-1 line-clamp-2 text-sm leading-relaxed text-[var(--ink-mute)]">
+                              {n.content}
+                            </p>
+                          )}
+                        </div>
+                        <span class="hidden shrink-0 font-mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] md:inline">
+                          {formatDate(n.createdAt ?? n.updatedAt ?? Date.now())}
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )
+    }
+  </section>
+</Layout>
+
+<style>
+  .text-gradient {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2) 60%, var(--accent-3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+</style>

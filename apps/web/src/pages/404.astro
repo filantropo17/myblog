@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="404 · 页面不存在">
+  <section class="relative grid min-h-[80vh] place-items-center px-6 pt-32 text-center">
+    <div>
+      <span class="eyebrow">404</span>
+      <h1 class="mt-6 font-display text-display-xl font-light tracking-[-0.04em]">
+        迷失在<span class="font-display-italic text-gradient">极光</span>中。
+      </h1>
+      <p class="mt-8 max-w-md text-lg text-[var(--ink-soft)]">
+        你访问的页面不存在，或者还在草稿池中等待发布。
+      </p>
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <a href="/" class="btn btn-primary" data-cursor="hover">
+          <span>回到首页</span>
+        </a>
+        <a href="/posts" class="btn" data-cursor="hover">
+          <span>浏览文章</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

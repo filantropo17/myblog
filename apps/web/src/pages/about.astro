@@ -1,0 +1,116 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getSiteConfig, getPosts, getProjects } from '../lib/api-server';
+
+const config = await getSiteConfig();
+const posts = await getPosts();
+const projects = await getProjects();
+
+const skills = config?.author?.skills ?? [];
+const socials = config?.author?.socials ?? {};
+
+// 大字母占位用姓氏首字母（"Qianji Xiao" → "X"）
+const authorName = config?.author?.name ?? 'Qianji Xiao';
+const initial = authorName.trim().split(/\s+/).pop()?.[0]?.toUpperCase() ?? 'X';
+---
+
+<Layout title="关于 · MyBlog">
+  <!-- Hero -->
+  <section class="relative pt-20 md:pt-32">
+    <div class="mx-auto max-w-[1320px] px-6 md:px-10">
+      <span class="eyebrow">关于</span>
+      <h1 class="mt-6 font-display text-display-xl font-light tracking-[-0.04em] text-balance">
+        你好，我是 <span class="font-display-italic text-gradient">{authorName}</span>。
+      </h1>
+      <p class="mt-8 max-w-2xl font-display text-2xl font-light leading-relaxed text-[var(--ink-soft)] text-pretty md:text-3xl">
+        {config?.author?.bio ?? '全栈工程师 / 设计爱好者 / 终身学习者。'}
+      </p>
+    </div>
+  </section>
+
+  <!-- 头像 + 元信息 -->
+  <section class="mx-auto max-w-[1320px] px-6 py-20 md:px-10">
+    <div class="grid gap-12 md:grid-cols-[1fr_2fr]">
+      <div>
+        <div class="card relative aspect-square overflow-hidden !p-0">
+          <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/30 via-[var(--accent-2)]/15 to-[var(--accent-3)]/30" />
+          <div class="absolute inset-0 grid place-items-center">
+            <span class="font-display text-[16rem] font-light leading-none opacity-20">
+              {initial}
+            </span>
+          </div>
+          <div class="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+            <div>
+              <div class="eyebrow text-[var(--ink)]">在线</div>
+              <div class="mt-1 flex items-center gap-2 font-mono text-xs">
+                <span class="h-2 w-2 animate-breath rounded-full bg-[var(--aurora-emerald,#10b981)]" />
+                欢迎合作
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 社交链接 -->
+        <div class="mt-6 space-y-3">
+          {socials.github && (
+            <a href={socials.github} target="_blank" class="flex items-center justify-between border-b border-[var(--border)] py-3 transition-colors hover:text-[var(--accent)]" data-cursor="hover">
+              <span class="font-mono text-xs uppercase tracking-wider">GitHub</span>
+              <span>↗</span>
+            </a>
+          )}
+          {socials.twitter && (
+            <a href={socials.twitter} target="_blank" class="flex items-center justify-between border-b border-[var(--border)] py-3 transition-colors hover:text-[var(--accent)]" data-cursor="hover">
+              <span class="font-mono text-xs uppercase tracking-wider">Twitter</span>
+              <span>↗</span>
+            </a>
+          )}
+          {socials.email && (
+            <a href={`mailto:${socials.email}`} class="flex items-center justify-between border-b border-[var(--border)] py-3 transition-colors hover:text-[var(--accent)]" data-cursor="hover">
+              <span class="font-mono text-xs uppercase tracking-wider">Email</span>
+              <span>↗</span>
+            </a>
+          )}
+          <a href="/rss.xml" class="flex items-center justify-between border-b border-[var(--border)] py-3 transition-colors hover:text-[var(--accent)]" data-cursor="hover">
+            <span class="font-mono text-xs uppercase tracking-wider">RSS</span>
+            <span>↗</span>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <div class="eyebrow">自我介绍</div>
+        <div class="prose-editorial mt-6 max-w-none">
+          <p>
+            我是 <strong>{authorName}</strong>，
+            一名在 <em>代码、AI 协作与 vibecoding 实践</em> 三者之间穿梭的工程师。
+            日常工作涉及 Python、Claude Code、MCP、Agent 编排与 RAG，
+            也乐于探索提示工程、Skill 设计与人机协作的边界。
+          </p>
+          <h2>我在做什么</h2>
+          <ul>
+            <li><strong>AI 协作流</strong> — Claude Code 驱动日常开发，MCP 串起工具链。</li>
+            <li><strong>Prompt 工艺</strong> — 把模糊需求翻译成可复用的对话模板。</li>
+            <li><strong>Agent 编排</strong> — Skill / Workflow / RAG 拼装可调试的智能体。</li>
+            <li><strong>个人博客</strong> — 用 vibecoding 记录 vibecoding。</li>
+          </ul>
+
+          <h2>技术栈</h2>
+          <p>{skills.join(' · ')}</p>
+
+          <h2>数字速览</h2>
+          <ul>
+            <li>{posts.length} 篇已发表文章</li>
+            <li>{projects.length} 个开源项目</li>
+            <li>2C2G 服务器，独占 300MB 内存</li>
+            <li>100% 静态前端 + SQLite + Drizzle</li>
+          </ul>
+
+          <h2>宣言</h2>
+          <blockquote>
+            "prompt 是需求，diff 是设计，commit 是产品。"
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

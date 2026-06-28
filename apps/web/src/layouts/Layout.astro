@@ -1,0 +1,105 @@
+---
+/**
+ * MyBlog — Base layout
+ * Wraps every page with: theme system, custom cursor, scroll progress, page loader,
+ * header, and footer.
+ */
+import '../styles/global.css';
+import { ThemeProvider, CursorFollower, ScrollProgress, PageLoader } from '../components/ThemeProvider';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CommandPalette from '../components/CommandPalette';
+import ChatWidget from '../components/ChatWidget';
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:8787';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const {
+  title = 'MyBlog',
+  description = '一个关于 vibecoding 实践的 AI 协作博客。AI · 提示工程 · 智能体。',
+  ogImage,
+} = Astro.props;
+
+const siteTitle = title === 'MyBlog' ? 'MyBlog · AI · Vibecoding · 实践' : `${title} · MyBlog`;
+---
+
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{siteTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MyBlog" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="application/rss+xml" title="MyBlog · 订阅" href="/rss.xml" />
+    <meta name="theme-color" content="#060503" />
+
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Inline script to apply theme before paint (no FOUC) -->
+    <script is:inline>
+      (function () {
+        try {
+          const stored = localStorage.getItem('myblog-theme');
+          const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          const theme = stored || (prefersLight ? 'light' : 'dark');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Enable view transitions -->
+    <meta name="view-transition" content="same-origin" />
+  </head>
+  <body>
+    <PageLoader client:load />
+    <ThemeProvider client:load />
+    <CursorFollower client:load />
+    <ScrollProgress client:load />
+
+    <!-- Atmospheric background -->
+    <div class="bg-atmosphere" aria-hidden></div>
+    <div class="bg-grid" aria-hidden></div>
+
+    <Header />
+
+    <main class="relative z-10">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <CommandPalette apiBase={apiBase} client:load />
+    <ChatWidget client:load />
+
+    <style>
+      main {
+        animation: pageEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes pageEnter {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </body>
+</html>

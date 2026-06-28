@@ -1,0 +1,30 @@
+---
+import '../styles/admin.css';
+import { AdminApp } from '../components/AdminApp';
+---
+
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>myblog · 管理后台</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      // 在首次渲染前根据 localStorage 设定主题，避免闪烁
+      (function () {
+        try {
+          var t = localStorage.getItem('myblog-theme');
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+        } catch (e) {}
+      })();
+      window.PUBLIC_API_BASE = 'http://localhost:8787';
+    </script>
+  </head>
+  <body>
+    <AdminApp client:only="react" />
+  </body>
+</html>

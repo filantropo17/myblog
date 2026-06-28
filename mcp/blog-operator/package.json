@@ -1,0 +1,27 @@
+{
+  "name": "@myblog/blog-operator-mcp",
+  "version": "1.0.0",
+  "description": "MCP server exposing MyBlog operator actions (drafts, comments, analytics) to external agents.",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "blog-operator-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
